@@ -60,7 +60,7 @@ if File.exist?(database_file)
     adapters.each do |adapter|
       case adapter
       when 'mysql2'
-        gem "mysql2", "0.3.14", :platforms => [:mri, :mingw, :x64_mingw]
+        gem "mysql2", "~> 0.4.6", :platforms => [:mri, :mingw, :x64_mingw]
         gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
       when 'mysql'
         gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
@@ -88,6 +88,8 @@ end
 group :development do
   gem "rdoc", ">= 2.4.2"
   gem "yard"
+  gem "byebug", platform: :mri
+  gem "pry-rails"
 end
 
 group :test do

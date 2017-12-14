@@ -28,7 +28,7 @@
     <th><%=l(:field_is_public)%></th>
     <th><%=l(:field_created_on)%></th>
     <% @project_custom_fileds.each do |value| %>
-    <th><%= l("field_#{value.custom_field.name}".to_sym) %></th>
+    <th><%= value.custom_field.name %></th>
     <% end %>
   </tr></thead>
   <tbody>

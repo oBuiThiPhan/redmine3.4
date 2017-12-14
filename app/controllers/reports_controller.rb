@@ -22,7 +22,6 @@ class ReportsController < ApplicationController
                 before_action :find_project, :authorize, :find_issue_statuses, except: %i(index create download)
                 before_action :require_login, only: %i(index create download)
 
-	
 	def index
 	sort_init 'id', 'asc'
 	sort_update %w(id name report_date status type_report)
@@ -35,16 +34,17 @@ class ReportsController < ApplicationController
 	@offset ||= @report_pages.offset
 	@reports = scope.order(sort_clause).limit(@limit).offset(@offset).to_a
 	end
-    def download
-	   report = Report.find_by id: params[:id]
-		   
-		 Rails.logger.info "--------------------------------------"
-		 Rails.logger.info report.link_file
-		 Rails.logger.info "--------------------------------------"
-	   
-	   	  send_file 'http://hrsb.seabank.com.vn/HRSBLogException.txt'
-		  
-	  end
+
+  def download
+    report = Report.find_by id: params[:id]
+
+	  Rails.logger.info "--------------------------------------"
+	  Rails.logger.info report.link_file
+	  Rails.logger.info "--------------------------------------"
+
+   	send_file report.link_file
+
+  end
 
 	def create
 		if params[:report_date].present? && params[:type_report].present?

@@ -88,7 +88,7 @@ force_default_language_for_anonymous:
 force_default_language_for_loggedin:
   default: 0
 host_name:
-  default: localhost:3000
+  default: localhost:3004
 protocol:
   default: http
 feeds_limit:
@@ -208,7 +208,7 @@ default_projects_modules:
   - gantt
 default_projects_tracker_ids:
   serialized: true
-  default: 
+  default:
 # Role given to a non-admin user who creates a project
 new_project_user_role_id:
   format: int

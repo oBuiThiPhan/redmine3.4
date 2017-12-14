@@ -32,28 +32,29 @@ module ProjectsHelper
     tabs.select {|tab| User.current.allowed_to?(tab[:action], @project)}
   end
   def project_to_csv(projects)
-	Redmine::Export::CSV.generate do |csv|
-	# Column headers
-	headers = project_export_header projects
-	csv << headers
-	# Content
-	projects.each do |project|
-	row = project.attributes.values_at(*%w(id name description homepage is_public))
-	row << format_date(project.created_on)
-	row += show_project_custom_value(project)
-	csv << row
+  	Redmine::Export::CSV.generate do |csv|
+    	# Column headers
+    	headers = project_export_header projects
+    	csv << headers
+    	# Content
+    	projects.each do |project|
+    	row = project.attributes.values_at(*%w(id name description homepage is_public))
+    	row << format_date(project.created_on)
+    	row += show_project_custom_value(project)
+    	csv << row
+    	end
+  	end
 	end
-	end
-	end
+
 	def show_project_custom_value project
-	project.visible_custom_field_values.map{|a| show_value(a, false)}
+	 project.visible_custom_field_values.map{|a| show_value(a, false)}
 	end
+
 	def project_export_header projects
-	project_fields = %w(id name description homepage is_public created_on)
-	product_custom_fields = projects.first.custom_field_values.map{|a|
-	a.custom_field.name}
-	(project_fields + product_custom_fields).map{|a| l("field_#{a}".to_sym)}
-end
+  	project_fields = %w(id name description homepage is_public created)
+  	product_custom_fields = projects.first.custom_field_values.map{|a| a.custom_field.name}
+  	project_fields + product_custom_fields
+  end
 
   def parent_project_select_tag(project)
     selected = project.parent

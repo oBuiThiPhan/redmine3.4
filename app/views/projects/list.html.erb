@@ -1,0 +1,69 @@
+<div class="contextual">
+  <%= form_tag({}, :method => :get) do %>
+  <label for="closed">
+  <%= check_box_tag 'closed', 1, params[:closed], :onchange => "this.form.submit();"
+  %>
+  <%= l(:label_show_closed_projects) %>
+  </label>
+  <% end %>
+  <%= render_project_action_links %>
+</div>
+<h2><%= l(:label_project_plural) %></h2>
+<%= form_tag(projects_list_path, :method => :get) do %>
+<fieldset><legend><%= l(:label_filter_plural) %></legend>
+<label for='name'><%= l(:label_project) %>:</label>
+<%= text_field_tag 'name', params[:name], :size => 30 %>
+<%= submit_tag l(:button_apply), :class => "small", :name => nil %>
+<%= link_to l(:button_clear), projects_list_path, :class => 'icon icon-reload' %>
+</fieldset>
+<% end %>
+&nbsp;
+<% if @projects.any? %>
+<div class="autoscroll" style="overflow-x:auto;height:500px">
+<table class="list projects">
+  <thead><tr>
+    <th><%=l(:label_project)%></th>
+    <th><%=l(:field_description)%></th>
+    <th><%= l(:field_homepage) %></th>
+    <th><%=l(:field_is_public)%></th>
+    <th><%=l(:field_created_on)%></th>
+    <% @project_custom_fileds.each do |value| %>
+    <th><%= value.custom_field.name %></th>
+    <% end %>
+  </tr></thead>
+  <tbody>
+    <% project_tree(@projects) do |project, level| %>
+      <tr class="<%= cycle("odd", "even") %> <%= project.css_classes %> <%= level > 0 ? "idnt idnt-#{level}" : nil %>">
+        <td class="name"><span>
+          <%= link_to_project(project, {}, :title => project.short_description) %>
+          <% if User.current.member_of?(project) %>
+          <span class="icon icon-fav my-project"></span>
+          <% end %>
+          </span>
+        </td>
+        <td class="description"><%= project.short_description %></td>
+        <td class="homepage"><%= project.homepage %></td>
+        <td class="is_public"><%= checked_image project.is_public? %></td>
+        <td class="created_on"><%= format_date(project.created_on) %></td>
+        <% render_custom_field_values(project) do |custom_field, formatted| %>
+          <td class="<%= custom_field.name %>"><%= formatted %></td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+</div>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+<% if User.current.logged? %>
+<p style="text-align:right;">
+<span class="icon icon-fav my-project"><%= l(:label_my_projects) %></span>
+</p>
+<% end %>
+<% other_formats_links do |f| %>
+<%= f.link_to 'Atom', :url => {:key => User.current.rss_key} %>
+<%= f.link_to 'CSV', :url => params %>
+<% end %>
+<% html_title(l(:label_project_plural)) -%>
+

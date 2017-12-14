@@ -1,0 +1,77 @@
+<h2><%=l(:label_report_plural)%></h2>
+
+<%= form_tag(reports_path, :method => :get, id: "report_search_form") do %>
+  <fieldset><legend><%= l(:label_filter_plural) %></legend>
+    <label for='report_date'><%= l(:field_report_date) %>:</label>
+    <%= date_field_tag :report_date, params[:report_date], :size => 10, id: "report_date" %>
+    <%= calendar_for('report_date') %>
+    <label for='type_report'><%= l(:field_type) %>:</label>
+    <%= select_tag 'type_report', content_tag('option') + options_for_select(Report.type_reports, params[:type_report]) %>
+  </fieldset>
+<p class="button">
+<%= link_to_function l(:button_create_report), 'createReport(event)',
+:class => 'icon icon-checked' %>
+<%= link_to_function l(:button_apply), '$("#report_search_form").submit()',
+:class => 'icon icon-checked' %>
+<%= link_to l(:button_clear), reports_path, :class => 'icon icon-reload' %>
+</p>
+<% end %>
+&nbsp;
+
+<% if @reports.any? %>
+<div class="autoscroll">
+<table class="list reports">
+  <thead>
+    <tr>
+      <th class="checkbox hide-when-print">
+        <%= check_box_tag 'check_all', '', false, :class => 'toggle-selection',
+              :title => "#{l(:button_check_all)}/#{l(:button_uncheck_all)}" %>
+      </th>
+      <%= sort_header_tag('id', title: "#") %>
+      <%= sort_header_tag('name', :caption => l(:field_name)) %>
+      <%= sort_header_tag('report_date', :caption => l(:field_report_date)) %>
+      <%= sort_header_tag('status', :caption => l(:field_status)) %>
+      <th><%= l(:field_link_file) %></th>
+      <th><%= l(:field_user) %></th>
+      <%= sort_header_tag('type_report', :caption => l(:field_type)) %>
+    </tr>
+  </thead>
+  <tbody>
+    <% @reports.each do |report| %>
+      <tr class="hascontextmenu">
+        <td class="checkbox hide-when-print"><%= check_box_tag("ids[]", report.id, false, :id => nil) %></td>
+        <td class="id"><%= report.id %></td>
+        <td class="name"><%= report.name %></td>
+        <td class="reportdate"><%= report.report_date.strftime("%d/%m/%y %H%M%S") %></td>
+        <td class="status"><%= report.status.to_s.capitalize %></td>
+        <td class="linkfile"><%= (link_to "Download", download_report_path(report)) if report.link_file %></td>
+        <td class="user"><%= report.user.name %></td>
+        <td class="typereport"><%= report.type_report %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+</div>
+<span class="pagination"><%= pagination_links_full @report_pages, @report_count %></span>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<% html_title(l(:label_report_plural)) -%>
+<%= context_menu(reports_path) %>
+<script type="text/javascript">
+function createReport(e){
+e.preventDefault();
+var url = "/reports";
+var data = $("#report_search_form").serializeArray();
+e.preventDefault();
+$.ajax({
+url: url,
+data: data,
+type: "post",
+success: function(){
+window.location = "<%= reports_path %>"
+}
+})
+}
+</script>

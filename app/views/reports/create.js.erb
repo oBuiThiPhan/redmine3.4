@@ -1,0 +1,9 @@
+<% if @report && @report.invalid? %>
+  $("#content")
+    .prepend("<div class='flash error report-error' id='flash_error'><ul></ul></div>");
+  <% @report.errors.full_messages.each do |msg| %>
+    $(".report-error ul").append("<li><%= msg %> </li>");
+  <% end %>
+<% else %>
+  window.location = "<%= reports_path %>"
+<% end %>

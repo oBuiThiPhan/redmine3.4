@@ -26,9 +26,7 @@ class ReportsController < ApplicationController
 	sort_init 'id', 'asc'
 	sort_update %w(id name report_date status type_report)
 	@limit = per_page_option
-	scope = Report.all.includes(:user)
-	scope = scope.with_type(params[:type_report]) if params[:type_report].present?
-	scope = scope.report_at(params[:report_date]) if params[:report_date].present?
+	scope = Report.search(params)
 	@report_count = scope.count
 	@report_pages = Paginator.new @report_count, @limit, params['page']
 	@offset ||= @report_pages.offset
@@ -47,14 +45,22 @@ class ReportsController < ApplicationController
   end
 
 	def create
-		if params[:report_date].present? && params[:type_report].present?
-		report = User.current.reports.create report_date: params[:report_date],
-		type_report: params[:type_report].to_i
-		flash[:notice] = l(:notice_report_successful_create, name: report.name)
+    if params[:report_date].present? && params[:type_report].present?
+      @report = User.current.reports.new report_date: params[:report_date],
+        type_report: params[:type_report].to_i, end_date: params[:end_date],
+        group_id: params[:group_id].to_i
+      if @report.save
+  		  flash[:notice] = l(:notice_report_successful_create, name: @report.name)
+      end
 		else
-		flash[:error] = l(:notice_report_fail_create)
+		  flash[:error] = l(:notice_report_fail_create)
 		end
+    respond_to do |format|
+      format.html {redirect_to :action => 'index', :id => @project }
+      format.js {render layout: false}
+    end
 	end
+
 	def current_menu_item
 		if [:index].include?(action_name.to_sym)
 		:reports

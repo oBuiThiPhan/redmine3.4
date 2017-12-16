@@ -5,14 +5,23 @@
     <label for='report_date'><%= l(:field_report_date) %>:</label>
     <%= date_field_tag :report_date, params[:report_date], :size => 10, id: "report_date" %>
     <%= calendar_for('report_date') %>
+    <label for='end_date'><%= "End date" %>:</label>
+    <%= date_field_tag :end_date, params[:end_date], :size => 10, id: "end_date" %>
+    <%= calendar_for('end_date') %>
     <label for='type_report'><%= l(:field_type) %>:</label>
     <%= select_tag 'type_report', content_tag('option') + options_for_select(Report.type_reports, params[:type_report]) %>
+    <label for='user_name'><%= l(:field_user) %>:</label>
+    <%= text_field_tag 'user_name', params[:user_name], :size => 30 %>
+    <% if Group.sorted.to_a.present? %>
+    <label for='group_id'><%= l(:label_group) %>:</label>
+    <%= select_tag 'group_id', content_tag('option') + options_from_collection_for_select(Group.sorted.to_a, :id, :name, params[:group_id].to_i) %>
+<% end %>
   </fieldset>
 <p class="button">
 <%= link_to_function l(:button_create_report), 'createReport(event)',
-:class => 'icon icon-checked' %>
+:class => 'icon icon-checked submit-button' %>
 <%= link_to_function l(:button_apply), '$("#report_search_form").submit()',
-:class => 'icon icon-checked' %>
+:class => 'icon icon-checked submit-button' %>
 <%= link_to l(:button_clear), reports_path, :class => 'icon icon-reload' %>
 </p>
 <% end %>
@@ -30,9 +39,11 @@
       <%= sort_header_tag('id', title: "#") %>
       <%= sort_header_tag('name', :caption => l(:field_name)) %>
       <%= sort_header_tag('report_date', :caption => l(:field_report_date)) %>
+      <%= sort_header_tag('end_date', :caption => "End date") %>
       <%= sort_header_tag('status', :caption => l(:field_status)) %>
       <th><%= l(:field_link_file) %></th>
       <th><%= l(:field_user) %></th>
+      <th><%= l(:label_group) %></th>
       <%= sort_header_tag('type_report', :caption => l(:field_type)) %>
     </tr>
   </thead>
@@ -43,9 +54,11 @@
         <td class="id"><%= report.id %></td>
         <td class="name"><%= report.name %></td>
         <td class="reportdate"><%= report.report_date.strftime("%d/%m/%y %H%M%S") %></td>
+        <td class="reportdate"><%= report.end_date.try(:strftime, "%d/%m/%y %H%M%S") %></td>
         <td class="status"><%= report.status.to_s.capitalize %></td>
         <td class="linkfile"><%= (link_to "Download", download_report_path(report)) if report.link_file %></td>
         <td class="user"><%= report.user.name %></td>
+        <td class="user"><%= report.group.try(:name) %></td>
         <td class="typereport"><%= report.type_report %></td>
       </tr>
     <% end %>
@@ -59,19 +72,29 @@
 
 <% html_title(l(:label_report_plural)) -%>
 <%= context_menu(reports_path) %>
+
 <script type="text/javascript">
 function createReport(e){
 e.preventDefault();
-var url = "/reports";
 var data = $("#report_search_form").serializeArray();
-e.preventDefault();
 $.ajax({
-url: url,
+url: '<%= reports_path(:format => 'js') %>',
 data: data,
 type: "post",
 success: function(){
-window.location = "<%= reports_path %>"
 }
 })
 }
+
+$("input#end_date, input#report_date").on("change", function(){
+  var report_date = Date.parse($("input#report_date").val());
+  var end_date = Date.parse($("input#end_date").val());
+  if (report_date && end_date && end_date < report_date){
+    $("#content").prepend("<div class='flash error due-date-error' id='flash_error'>Start date must less than due date.</div>");
+    $(".button .submit-button").hide();
+  }else{
+    $(".due-date-error").remove();
+    $(".button .submit-button").show();
+  }
+})
 </script>

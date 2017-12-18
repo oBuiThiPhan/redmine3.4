@@ -10,8 +10,9 @@
     <%= calendar_for('end_date') %>
     <label for='type_report'><%= l(:field_type) %>:</label>
     <%= select_tag 'type_report', content_tag('option') + options_for_select(Report.type_reports, params[:type_report]) %>
-    <label for='user_name'><%= l(:field_user) %>:</label>
-    <%= text_field_tag 'user_name', params[:user_name], :size => 30 %>
+    <label for='user_id'><%= l(:field_user) %>:</label>
+    <%= select_tag 'user_id', content_tag('option') + options_from_collection_for_select(User.logged.to_a, :id, :name, params[:user_id].to_i), id: "report_user_id" %>
+    <script type="text/javascript">$("#report_user_id").select2();</script>
     <% if Group.sorted.to_a.present? %>
     <label for='group_id'><%= l(:label_group) %>:</label>
     <%= select_tag 'group_id', content_tag('option') + options_from_collection_for_select(Group.sorted.to_a, :id, :name, params[:group_id].to_i) %>
@@ -98,3 +99,7 @@ $("input#end_date, input#report_date").on("change", function(){
   }
 })
 </script>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" %>
+  <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js" %>
+<% end %>

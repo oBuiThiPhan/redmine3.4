@@ -46,7 +46,8 @@ class ReportsController < ApplicationController
 
 	def create
     if params[:report_date].present? && params[:type_report].present?
-      @report = User.current.reports.new report_date: params[:report_date],
+      @user = User.find_by(id: params[:user_id]) || User.current
+      @report = @user.reports.new report_date: params[:report_date],
         type_report: params[:type_report].to_i, end_date: params[:end_date],
         group_id: params[:group_id].to_i
       if @report.save

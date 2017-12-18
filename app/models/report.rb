@@ -35,15 +35,17 @@ class Report < ActiveRecord::Base
       params[:start_date] = date.beginning_of_day
       params[:end_date] = date.end_of_day
     end
-    %w(type_report group_id).map do |a|
-      if q[a.to_sym].present?
-        sql << " #{table_name}.#{a} = :#{a}"
-        params[a.to_sym] = q[a.to_sym]
-      end
+    if q[:type_report].present?
+      sql << " #{table_name}.type_report = :type_report"
+      params[:type_report] = q[:type_report]
     end
-    if q[:user_name].present?
-      sql << " LOWER(users.firstname) LIKE LOWER(:name) OR LOWER(users.lastname) LIKE LOWER(:name)"
-      params[:name] = "%#{q[:user_name]}%"
+    if q[:group_id].present?
+      sql << " #{table_name}.group_id = :group_id"
+      params[:group_id] = q[:group_id]
+    end
+    if q[:user_id].present?
+      sql << " #{table_name}.user_id = :user_id"
+      params[:user_id] = q[:user_id]
     end
     joins(:user).where(sql.join(" AND "), params)
   end
